@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Star</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            font-family: 'Arial', sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #scoreboard {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div id="scoreboard">Score: 0</div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreboard = document.getElementById('scoreboard');
+
+        // Kích thước Canvas
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let score = 0;
+        let player = { x: canvas.width / 2 - 25, y: canvas.height - 60, width: 50, height: 50, color: '#ffcc00' };
+        let stars = [];
+        const starImage = new Image();
+        starImage.src = 'https://img.icons8.com/emoji/48/000000/star-emoji.png';
+
+        // Sự kiện di chuyển chuột
+        document.addEventListener('mousemove', (e) => {
+            player.x = e.clientX - player.width / 2;
+        });
+
+        function createStar() {
+            const size = Math.random() * 30 + 20;
+            stars.push({ x: Math.random() * canvas.width, y: -size, size: size, speed: Math.random() * 3 + 2 });
+        }
+
+        function updateStars() {
+            for (let i = stars.length - 1; i >= 0; i--) {
+                stars[i].y += stars[i].speed;
+                if (stars[i].y > canvas.height) {
+                    stars.splice(i, 1);
+                }
+                if (
+                    stars[i].x < player.x + player.width &&
+                    stars[i].x + stars[i].size > player.x &&
+                    stars[i].y < player.y + player.height &&
+                    stars[i].y + stars[i].size > player.y
+                ) {
+                    stars.splice(i, 1);
+                    score++;
+                    scoreboard.textContent = `Score: ${score}`;
+                }
+            }
+        }
+
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function drawStars() {
+            for (const star of stars) {
+                ctx.drawImage(starImage, star.x, star.y, star.size, star.size);
+            }
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawStars();
+            updateStars();
+            requestAnimationFrame(gameLoop);
+        }
+
+        setInterval(createStar, 1000);
+        gameLoop();
+    </script>
+</body>
+</html>
